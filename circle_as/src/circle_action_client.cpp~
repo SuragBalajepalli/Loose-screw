@@ -1,0 +1,63 @@
+#include <ros/ros.h>
+#include <actionlib/client/simple_action_client.h>
+#include <circle_action/circular_pathAction.h>
+#include <arm7dof_fk_ik/arm7dof_kinematics.h>
+#include <joint_space_planner/joint_space_planner.h>
+
+std::vector<vector<Eigen::VectorXd>> g_path_solns;
+ 
+void perception_doneCallBack(const actionlib::SimpleClientGoalState& state, const bundle::perceptionResultConstPtr& result) {
+	ROS_INFO("perception complete; Pose recieved")
+	g_recieved_pose=result->pose;
+	
+}
+
+void path_doneCallBack(const actionlib::SimpleClientGoalState& state, const bundle::circular_pathResultConstPtr& result) {
+	ROS_INFO("Path recieved");
+	for(int i=0;i<=result.size();i++)
+	{
+	geometry_msgs::Pose recieved_pose;
+	recieved_pose=result->path.poses[i];
+	std::vector<vector7x1> soln;
+	Eigen::Affine3d aff;
+	int no_of_solns;
+	//generate stuff from path
+	aff = Eigen::Translation3d(recieved_pose.position.x,recieved_pose.position.y,recieved_pose.position.z) *
+       Eigen::Quaterniond(recieved_pose.orientation.w,recieved_pose.orientation.x,recieved_pose.orientation.y,recieved_pose.orientation.z);
+ 	
+ 	no_of_solns= arm7dof_ik_solver.ik_solns_sampled_qs0(aff,soln);// what do i do with this?// can i call the ik function here? so many questions// why didnt i learn c++ properly
+ 	g_path_solns.pushback(soln);
+ 	joint_space_planner.compute_optimal_path(g_path_solns);//how to use "get" method to get member var optimal_path?
+ 	//why did i Make the path global?
+ 	//can this client connect to another server? why not?
+ 	//send this stuff to robot motion node
+
+    
+	}
+}
+
+int main (int argc, char** argv) {
+	ros::init(argc, argv, "circle_action_client_node")
+	circular_path_as::circular_pathGoal path_goal;
+	actionlib::SimpleActionClient<bundle::circular_pathAction> path_ac("whats his name", true);
+	actionlib::SimpleActionClient<bundle::perceptionAction> perception_ac("whats his name2", true);
+
+	Arm7dof_IK_solver arm7dof_ik_solver;
+	JointSpacePlaner joint_space_planner;
+	g_path_solns.clear();
+
+	//first do perception, get pose, put in global from done function, then send as goal to path
+	perception_ac.sendGoal(perception_goal, perception_doneCallBack);
+	bool server_exists = path_ac.waitForServer(ros::Duration(5.0));
+	while(!server_exists) {
+		ROS_INFO("waiting for server");
+	}
+	ROS_INFO("connection success");
+	//stuff to find pose of  nut
+	path_ac.sendGoal(path_goal, &path_doneCallBack);
+	bool finished_before_timeout = path_ac.waitForResult(ros::Duration(5.0));
+	while(!finished_before_timeout) {
+		ROS_INFO("waiting")
+	}
+
+}
