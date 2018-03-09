@@ -1,11 +1,11 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
-#include <circle_action/circular_pathAction.h>
 #include <arm7dof_fk_ik/arm7dof_kinematics.h>
 #include <joint_space_planner/joint_space_planner.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_ros/point_cloud.h> 
 //#include <pcl/ros/conversions.h>
+#include <nav_msgs/Path.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/common_headers.h>
@@ -16,14 +16,126 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_utils/pcl_utils.h>  //a local library with some utility fncs
 #include <circle_action/perceptionAction.h>
+#include <actionlib/client/terminal_state.h>
+#include <arm7dof_traj_as/arm7dof_traj_as.h>
+#include<arm7dof_traj_as/trajAction.h>
+#include <xform_utils/xform_utils.h>
 
+
+
+std::vector<Eigen::VectorXd> optimal_path;
 std::vector<vector<Eigen::VectorXd> > g_path_solns;
+pcl::PointCloud<pcl::PointXYZ>::Ptr g_pclSelectedPoints_ptr;
 geometry_msgs::Pose g_recieved_pose;
 Arm7dof_IK_solver arm7dof_ik_solver;
+nav_msgs::Path g_path;
 //JointSpacePlanner joint_space_planner;
 bool g_pose_recieved = false; 
 bool g_recieved_patch = false;
+XformUtils xformUtils;
 double g_surface_z;
+Eigen::VectorXd weights;
+
+
+geometry_msgs::Quaternion convertPlanarPsi2Quaternion(double psi) {
+    geometry_msgs::Quaternion quaternion;
+    quaternion.x = 0.0;
+    quaternion.y = 0.0;
+    quaternion.z = sin(psi / 2.0);
+    quaternion.w = cos(psi / 2.0);
+    return (quaternion);
+}
+
+double convertPlanarQuaternion2Psi(geometry_msgs::Quaternion quaternion) {
+	double psi;
+	psi=atan2(quaternion.z,quaternion.w);
+	return psi;
+}
+
+
+void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, nav_msgs::Path &circular_path) {
+	Eigen::Affine3d tf_wrench, pose_center, pose_wrench;
+	geometry_msgs::Pose wrench_pose;
+	geometry_msgs::PoseStamped desired_pose;
+	circular_path.header.seq=0;
+    circular_path.header.stamp=ros::Time::now();
+    circular_path.header.frame_id== "world";
+    double amp = 1.0;
+    double phase = convertPlanarQuaternion2Psi(wrench_pose.orientation);
+    double omega = 1.0;
+    double dt = 0.01;
+    double x, y, z;
+    z = 0;
+    double ang_min,ang_max;
+    double ang_i=ang_min;
+    int i=0;
+    //nut pose to affine, multiply with wrench transform, back to pose, check xform utils
+	while(phase<ang_max) {
+    		if (phase > 2.0 * M_PI) phase -= 2.0 * M_PI;
+        	phase += omega*dt;
+        	x = amp *sin(phase);
+        	y = amp *cos(phase);
+        	desired_pose.header.seq=i;
+    		desired_pose.header.stamp=ros::Time::now();
+    		desired_pose.header.frame_id="world";
+    		desired_pose.pose.position.x=wrench_pose.position.x+x;
+    		desired_pose.pose.position.y=wrench_pose.position.y+y;
+    		desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase); 
+         	circular_path.poses.push_back(desired_pose);
+        	i++;
+    		
+        }
+}
+
+void find_optimal_path_from_path_message (nav_msgs::Path path, std::vector<Eigen::VectorXd> &optimal_path) {
+	int nsolns;
+	Eigen::VectorXd node;
+	std::vector<Vectorq7x1> q_solns;
+	std::vector<Eigen::VectorXd> single_layer_nodes;
+	for(int i=0;i<=path.poses.size();i++) {
+	
+	geometry_msgs::PoseStamped recieved_pose;
+	recieved_pose=path.poses[i];
+	std::vector<Vectorq7x1> soln;
+	Eigen::Affine3d aff;
+	int no_of_solns;
+		
+	//aff = Eigen::Translation3d(recieved_pose.pose.position.x,recieved_pose.pose.position.y,recieved_pose.pose.position.z) *
+      // Eigen::Quaterniond(recieved_pose.pose.orientation.w,recieved_pose.pose.orientation.x,recieved_pose.pose.orientation.y,recieved_pose.pose.orientation.z); //replace with func from xfor utils
+ 	
+ 	aff = xformUtils.transformPoseToEigenAffine3d(recieved_pose);
+
+    
+    //initialize weights
+ 	weights.resize(7);
+    for (int i = 0; i < 7; i++) {
+        weights(i) = 1.0;
+    }
+
+ 	no_of_solns= arm7dof_ik_solver.ik_solns_sampled_qs0(aff,soln);
+ 	single_layer_nodes.clear();
+ 	if (no_of_solns>0) {
+ 	single_layer_nodes.resize(nsolns);
+        for (int isoln = 0; isoln < nsolns; isoln++) {
+    		node = q_solns[isoln];
+            single_layer_nodes[isoln] = node;
+            }
+    g_path_solns.push_back(single_layer_nodes);
+         }
+ 	}
+ 	{
+ 	JointSpacePlanner jsp(g_path_solns, weights);
+ 	jsp.get_soln(optimal_path);
+	}
+}
+
+
+void armDoneCb(const actionlib::SimpleClientGoalState& state,
+        const arm7dof_traj_as::trajResultConstPtr& result) {
+    ROS_INFO("armDoneCb: server responded with state [%s]", state.toString().c_str());
+    ROS_INFO("got return val = %d", result->return_val);
+}
+
 
 void perception_doneCallBack(const actionlib::SimpleClientGoalState& state, const circle_action::perceptionResultConstPtr& result) {
 	ROS_INFO("perception complete; Pose recieved");
@@ -31,31 +143,10 @@ void perception_doneCallBack(const actionlib::SimpleClientGoalState& state, cons
 	g_pose_recieved = true;
 }
 
-void path_doneCallBack(const actionlib::SimpleClientGoalState& state, const circle_action::circular_pathResultConstPtr& result) {
-	ROS_INFO("Path recieved");
-	for(int i=0;i<=result->path.poses.size();i++)
-	{
-	geometry_msgs::PoseStamped recieved_pose;
-	recieved_pose=result->path.poses[i];
-	std::vector<Vectorq7x1> soln;
-	Eigen::Affine3d aff;
-	int no_of_solns;
-	//generate stuff from path
-	aff = Eigen::Translation3d(recieved_pose.pose.position.x,recieved_pose.pose.position.y,recieved_pose.pose.position.z) *
-       Eigen::Quaterniond(recieved_pose.pose.orientation.w,recieved_pose.pose.orientation.x,recieved_pose.pose.orientation.y,recieved_pose.pose.orientation.z);
- 	
- 	no_of_solns= arm7dof_ik_solver.ik_solns_sampled_qs0(aff,soln);// what do i do with this?// can i call the ik function here? so many questions// why didnt i learn c++ properly
- 	//g_path_solns.push_back(soln);
- 	//joint_space_planner.compute_optimal_path(g_path_solns);//how to use "get" method to get member var optimal_path?
- 	//why did i Make the path global?
- 	//can this client connect to another server? why not?
- 	//send this stuff to robot motion node
 
-    
-	}
-}
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr g_pclSelectedPoints_ptr;
+
+
 void selectCB(const sensor_msgs::PointCloud2ConstPtr& cloud) {
     ROS_INFO("RECEIVED NEW PATCH");
 
@@ -95,20 +186,25 @@ void selectCB(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 
 int main (int argc, char** argv) {
-	ros::init(argc, argv, "circle_action_client_node");
-	circle_action::circular_pathGoal path_goal;
+	ros::init(argc, argv, "screw_action_client_node");
+	ros::NodeHandle nh;
+	
 	circle_action::perceptionGoal perception_goal;
-	Eigen::Vector4f plane_parameters;
-	actionlib::SimpleActionClient<circle_action::circular_pathAction> path_ac("whats his name", true);
-	actionlib::SimpleActionClient<circle_action::perceptionAction> perception_ac("whats his name2", true);
-    ros::NodeHandle nh;
-	g_path_solns.clear();
-
-	 ros::Subscriber selected_points_subscriber = nh.subscribe<sensor_msgs::PointCloud2> ("/selected_points", 1, selectCB);
+	arm7dof_traj_as::trajGoal arm_goal;
+	Eigen::VectorXd q_pre_pose;
+    Eigen::VectorXd q_vec;
+    std::vector<Eigen::VectorXd> des_path;
+    trajectory_msgs::JointTrajectory des_trajectory;
+    Arm7dof_traj_streamer arm7dof_traj_streamer(&nh);
+	actionlib::SimpleActionClient<circle_action::perceptionAction> perception_ac("whatshisname2", true);
+   	actionlib::SimpleActionClient<arm7dof_traj_as::trajAction> arm_action_client("trajActionServer", true);
+    q_pre_pose.resize(7);
+    q_pre_pose << 0, 1, 0, -2, 0, 1, 0; 
+    g_path_solns.clear();
+    ros::Subscriber selected_points_subscriber = nh.subscribe<sensor_msgs::PointCloud2> ("/selected_points", 1, selectCB);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclSelectedPoints_ptr(new pcl::PointCloud<pcl::PointXYZ>);
     g_pclSelectedPoints_ptr = pclSelectedPoints_ptr;
     
-    //loop to test for new selected-points inputs and compute and display corresponding planar fits 
     while (!g_recieved_patch) {
     	ROS_INFO(" select a patch of points to find the selected-points centroid...");
         ros::spinOnce(); //callback does all the work
@@ -116,22 +212,54 @@ int main (int argc, char** argv) {
     }
 
 
-	perception_goal.surface_z=g_surface_z;
-	//first do perception, get pose, put in global from done function, then send as goal to path
-	perception_ac.sendGoal(perception_goal, perception_doneCallBack);
-	bool server_exists = path_ac.waitForServer(ros::Duration(5.0));
+    bool server_exists = perception_ac.waitForServer(ros::Duration(5.0));
 	while(!server_exists) {
 		ROS_INFO("waiting for server");
 	}
 	ROS_INFO("connection success");
-	//stuff to find pose of  nut
-	while(!g_pose_recieved) {
-		ros::Duration(0.1).sleep();
-	}
-	path_ac.sendGoal(path_goal, &path_doneCallBack);
-	bool finished_before_timeout = path_ac.waitForResult(ros::Duration(5.0));
-	while(!finished_before_timeout) {
-		ROS_INFO("waiting");
-	}
+
+	perception_goal.surface_z=g_surface_z;
+	//first do perception, get pose, put in global from done function, then send as goal to path
+	perception_ac.sendGoal(perception_goal, perception_doneCallBack);
+	
+
+	while (!g_pose_recieved) {
+    	ROS_INFO(" waiting for nut pose");
+        ros::spinOnce(); //callback does all the work
+        ros::Duration(0.1).sleep();
+    }
+
+	make_circular_path_around_provided_pose(g_recieved_pose, g_path);
+	find_optimal_path_from_path_message(g_path, optimal_path);
+
+	
+	q_vec = arm7dof_traj_streamer.get_q_vec_Xd(); 
+    cout << "arm current state:" << q_vec.transpose() << endl;
+    
+    des_path.push_back(q_vec); //start from current pose
+    des_path.push_back(q_pre_pose); 
+
+    cout << "stuffing traj: " << endl;
+    //convert from vector of 7dof poses to trajectory message  
+    arm7dof_traj_streamer.stuff_trajectory(optimal_path, des_trajectory); 
+    	
+
+
+	ROS_INFO("waiting for arm server: ");
+    bool server_exists2 = arm_action_client.waitForServer(ros::Duration(1.0));
+    while (!server_exists2) {
+        ROS_WARN("waiting on server...");
+        ros::spinOnce();
+        ros::Duration(1.0).sleep();
+        server_exists2 = arm_action_client.waitForServer(ros::Duration(1.0));
+    }
+    ROS_INFO("connected to arm action server"); // if here, then we connected to the server;  
+
+    ROS_INFO("sending goals to arm: ");
+    arm_action_client.sendGoal(arm_goal, &armDoneCb); 
+    bool finished_before_timeout2=false;
+    finished_before_timeout2 = arm_action_client.waitForResult(ros::Duration(10.0));
+    
+
 
 }

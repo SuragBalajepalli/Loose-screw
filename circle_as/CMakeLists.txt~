@@ -10,7 +10,7 @@ add_definitions(${EIGEN_DEFINITIONS})
 catkin_simple()
 
 # Executables
-cs_add_executable(pose_in_cirlce_server src/pose_in_circle_server.cpp)
+
 cs_add_executable(circle_action_client src/circle_action_client.cpp)
 cs_add_executable(perception_server.cpp src/perception_server.cpp)
 cs_install()
