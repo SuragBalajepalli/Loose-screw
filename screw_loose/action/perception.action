@@ -1,0 +1,5 @@
+float64 surface_z 
+---
+geometry_msgs/Pose nut_pose
+---
+int32 fdbk
