@@ -15,7 +15,7 @@
 #include <pcl/filters/voxel_grid.h> 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_utils/pcl_utils.h>  //a local library with some utility fncs
-#include <screw_loose/perceptionAction.h>
+#include <screw_loose_test/perceptionAction.h>
 #include <actionlib/client/terminal_state.h>
 #include <arm7dof_traj_as/arm7dof_traj_as.h>
 #include<arm7dof_traj_as/trajAction.h>
@@ -74,11 +74,11 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
 	//but for debug:
 	wrench_pose.position.x=0;
 	wrench_pose.position.y=0;
-	wrench_pose.position.z=0;
+	wrench_pose.position.z=1;
 	wrench_pose.orientation.x=0;
-	wrench_pose.orientation.y=0;
+	wrench_pose.orientation.y=1;
 	wrench_pose.orientation.z=0;
-	wrench_pose.orientation.w=1;
+	wrench_pose.orientation.w=0;
 	//
 	//first pose above nut
 	desired_pose.header.seq=i;
@@ -86,7 +86,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=wrench_pose.position.x;
     desired_pose.pose.position.y=wrench_pose.position.y;
-    desired_pose.pose.position.z=wrench_pose.position.z+0.2;//start with 20cm above surface
+    desired_pose.pose.position.z=wrench_pose.position.z-0.2;//start with 20cm above surface
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -96,7 +96,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=wrench_pose.position.x;
     desired_pose.pose.position.y=wrench_pose.position.y;
-    desired_pose.pose.position.z=wrench_pose.position.z;//start with 20cm above surface
+    desired_pose.pose.position.z=wrench_pose.position.z;
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -121,7 +121,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=desired_pose.pose.position.x;
     desired_pose.pose.position.y=desired_pose.pose.position.y;
-    desired_pose.pose.position.z=desired_pose.pose.position.z+0.2;//start with 20cm above surface
+    desired_pose.pose.position.z=desired_pose.pose.position.z-0.2;//start with 20cm above surface
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -216,7 +216,7 @@ int main (int argc, char** argv) {
 
 	optimal_path.clear();
 	arm7dof_traj_as::trajGoal arm_goal;
-	screw_loose::perceptionGoal perception_goal;
+	screw_loose_test::perceptionGoal perception_goal;
 	Eigen::VectorXd q_pre_pose;
     Eigen::VectorXd q_vec;
     std::vector<Eigen::VectorXd> des_path;
