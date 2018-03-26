@@ -363,7 +363,7 @@
   <!--this is silly, but need to include transmission spec in order to get ft_sensor link frame published-->
   <transmission name="tran7">
 	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="wrench">
+	<joint name="wrench_jnt">
 	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
 	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
 	  <hardwareInterface>EffortJointInterface</hardwareInterface>
@@ -389,14 +389,14 @@
       <collision>
           <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0"/>
           <geometry>
-            <mesh filename="file:///home/user/ros_ws/src/socket_wrench.stl"  scale="0.05 0.05 0.05"/> 
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/> 
         </geometry>
       </collision>
 
       <visual>
           <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0" />
           <geometry>
-            <mesh filename="file:///home/user/ros_ws/src/socket_wrench.stl"  scale="0.05 0.05 0.05"/>  
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/>  
           </geometry>
           <material name="ft_sensor_color">
               <color rgba="1 0 0 1.0"/>

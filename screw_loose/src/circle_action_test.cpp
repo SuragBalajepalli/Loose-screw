@@ -60,7 +60,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     circular_path.header.stamp=ros::Time::now();
     circular_path.header.frame_id== "world";
     double amp = 1.0;
-    double phase = convertPlanarQuaternion2Psi(center_pose.orientation);
+    
     double omega = 1.0;
     double dt = 0.1;
     double x, y, z;
@@ -74,11 +74,12 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
 	//but for debug:
 	wrench_pose.position.x=0;
 	wrench_pose.position.y=0;
-	wrench_pose.position.z=1;
+	wrench_pose.position.z=1.5;
 	wrench_pose.orientation.x=0;
 	wrench_pose.orientation.y=1;
 	wrench_pose.orientation.z=0;
 	wrench_pose.orientation.w=0;
+	double phase = convertPlanarQuaternion2Psi(wrench_pose.orientation);
 	//
 	//first pose above nut
 	desired_pose.header.seq=i;
@@ -108,9 +109,9 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
         	desired_pose.header.seq=i;
     		desired_pose.header.stamp=ros::Time::now();
     		desired_pose.header.frame_id="world";
-    		desired_pose.pose.position.x=center_pose.position.x+x;
-    		desired_pose.pose.position.y=center_pose.position.y+y;
-    		desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase); 
+    		desired_pose.pose.position.x=wrench_pose.position.x+x;
+    		desired_pose.pose.position.y=wrench_pose.position.y+y;
+    		desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase+1.57); 
          	circular_path.poses.push_back(desired_pose);
         	i++;
     		
