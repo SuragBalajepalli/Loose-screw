@@ -20,6 +20,7 @@
 #include <arm7dof_traj_as/arm7dof_traj_as.h>
 #include<arm7dof_traj_as/trajAction.h>
 #include <xform_utils/xform_utils.h>
+#include <control_msgs/FollowJointTrajectoryAction.h>
 
 
 
@@ -196,11 +197,7 @@ bool find_optimal_path_from_path_message (nav_msgs::Path path, std::vector<Eigen
 }
 
 
-void armDoneCb(const actionlib::SimpleClientGoalState& state,
-        const arm7dof_traj_as::trajResultConstPtr& result) {
-    ROS_INFO("armDoneCb: server responded with state [%s]", state.toString().c_str());
-    ROS_INFO("got return val = %d", result->return_val);
-}
+
 
 
 
@@ -216,14 +213,14 @@ int main (int argc, char** argv) {
 	nav_msgs::Path g_path;
 
 	optimal_path.clear();
-	arm7dof_traj_as::trajGoal arm_goal;
+	control_msgs::FollowJointTrajectoryGoal arm_goal;
 	screw_loose_test::perceptionGoal perception_goal;
 	Eigen::VectorXd q_pre_pose;
     Eigen::VectorXd q_vec;
     std::vector<Eigen::VectorXd> des_path;
     trajectory_msgs::JointTrajectory des_trajectory;
     Arm7dof_traj_streamer arm7dof_traj_streamer(&nh);
-	actionlib::SimpleActionClient<arm7dof_traj_as::trajAction> arm_action_client("trajActionServer", true);
+	actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_action_client("/arm7dof/joint_trajectory_controller/follow_joint_trajectory/", true);
 	
 
     q_pre_pose.resize(7);
@@ -276,7 +273,7 @@ int main (int argc, char** argv) {
     ROS_INFO("connected to arm action server"); // if here, then we connected to the server;  
     arm_goal.trajectory=des_trajectory;
     ROS_INFO("sending goals to arm: ");
-    arm_action_client.sendGoal(arm_goal, &armDoneCb); 
+    arm_action_client.sendGoal(arm_goal); 
 	}
     bool finished_before_timeout2=false;
     while (!finished_before_timeout2) {
