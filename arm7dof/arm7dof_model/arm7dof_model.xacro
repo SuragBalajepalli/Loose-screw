@@ -257,7 +257,7 @@
 <transmission name="tran0">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint0">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor0">
       <mechanicalReduction>7680</mechanicalReduction>
@@ -267,7 +267,7 @@
   <transmission name="tran1">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint1">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
       <mechanicalReduction>7680</mechanicalReduction>
@@ -277,7 +277,7 @@
   <transmission name="tran2">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint2">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor2">
       <mechanicalReduction>3584</mechanicalReduction>
@@ -287,7 +287,7 @@
   <transmission name="tran3">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint3">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor3">
       <mechanicalReduction>3584</mechanicalReduction>
@@ -297,7 +297,7 @@
  <transmission name="tran4">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint4">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor4">
       <mechanicalReduction>3125</mechanicalReduction>
@@ -308,7 +308,7 @@
   <transmission name="tran5">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint5">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor5">
       <mechanicalReduction>3125</mechanicalReduction>
@@ -318,7 +318,7 @@
   <transmission name="tran6">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="joint6">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor6">
       <mechanicalReduction>3125</mechanicalReduction>
@@ -329,7 +329,7 @@
 <transmission name="tran7">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="wrench_jnt">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor7">
       <mechanicalReduction>1</mechanicalReduction>
@@ -337,12 +337,7 @@
   </transmission>
 
        
-    <gazebo>
-     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-       <robotNamespace>/arm7dof</robotNamespace>
-     </plugin>
-  </gazebo>
-  
+    
   
   <!--model a f/t sensor; set up a link and a joint -->
   <link name="wrench">
@@ -380,17 +375,13 @@
     <dynamics damping="1.0"/>    
   </joint>
 
+  <gazebo>
+     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+       <robotNamespace>/arm7dof</robotNamespace>
+     </plugin>
+  </gazebo>
+  
 
     <!-- Enable Joint Feedback -->
-    <gazebo reference="ft_sensor_jnt">
-        <provideFeedback>true</provideFeedback>
-    </gazebo>
-    <!-- The ft_sensor plugin -->
-    <gazebo>
-        <plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
-            <updateRate>1000.0</updateRate>
-            <topicName>ft_sensor_topic</topicName>
-            <jointName>ft_sensor_jnt</jointName>
-        </plugin>
-    </gazebo>
+    
 </robot>
