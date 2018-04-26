@@ -15,11 +15,12 @@
 #include <pcl/filters/voxel_grid.h> 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_utils/pcl_utils.h>  //a local library with some utility fncs
-#include <screw_loose/perceptionAction.h>
+#include <screw_loose_test/perceptionAction.h>
 #include <actionlib/client/terminal_state.h>
 #include <arm7dof_traj_as/arm7dof_traj_as.h>
 #include<arm7dof_traj_as/trajAction.h>
 #include <xform_utils/xform_utils.h>
+#include <control_msgs/FollowJointTrajectoryAction.h>
 
 
 
@@ -60,7 +61,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     circular_path.header.stamp=ros::Time::now();
     circular_path.header.frame_id== "world";
     double amp = 1.0;
-    double phase = convertPlanarQuaternion2Psi(center_pose.orientation);
+    
     double omega = 1.0;
     double dt = 0.1;
     double x, y, z;
@@ -74,11 +75,12 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
 	//but for debug:
 	wrench_pose.position.x=0;
 	wrench_pose.position.y=0;
-	wrench_pose.position.z=0;
+	wrench_pose.position.z=1.5;
 	wrench_pose.orientation.x=0;
-	wrench_pose.orientation.y=0;
+	wrench_pose.orientation.y=1;
 	wrench_pose.orientation.z=0;
-	wrench_pose.orientation.w=1;
+	wrench_pose.orientation.w=0;
+	double phase = convertPlanarQuaternion2Psi(wrench_pose.orientation);
 	//
 	//first pose above nut
 	desired_pose.header.seq=i;
@@ -86,7 +88,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=wrench_pose.position.x;
     desired_pose.pose.position.y=wrench_pose.position.y;
-    desired_pose.pose.position.z=wrench_pose.position.z+0.2;//start with 20cm above surface
+    desired_pose.pose.position.z=wrench_pose.position.z-0.2;//start with 20cm above surface
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -96,7 +98,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=wrench_pose.position.x;
     desired_pose.pose.position.y=wrench_pose.position.y;
-    desired_pose.pose.position.z=wrench_pose.position.z;//start with 20cm above surface
+    desired_pose.pose.position.z=wrench_pose.position.z;
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -108,9 +110,9 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
         	desired_pose.header.seq=i;
     		desired_pose.header.stamp=ros::Time::now();
     		desired_pose.header.frame_id="world";
-    		desired_pose.pose.position.x=center_pose.position.x+x;
-    		desired_pose.pose.position.y=center_pose.position.y+y;
-    		desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase); 
+    		desired_pose.pose.position.x=wrench_pose.position.x+x;
+    		desired_pose.pose.position.y=wrench_pose.position.y+y;
+    		desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase+1.57); 
          	circular_path.poses.push_back(desired_pose);
         	i++;
     		
@@ -121,7 +123,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
     desired_pose.header.frame_id="world";
     desired_pose.pose.position.x=desired_pose.pose.position.x;
     desired_pose.pose.position.y=desired_pose.pose.position.y;
-    desired_pose.pose.position.z=desired_pose.pose.position.z+0.2;//start with 20cm above surface
+    desired_pose.pose.position.z=desired_pose.pose.position.z-0.2;//start with 20cm above surface
     desired_pose.pose.orientation=convertPlanarPsi2Quaternion(-phase);
 	circular_path.poses.push_back(desired_pose);
 	i++;
@@ -195,11 +197,7 @@ bool find_optimal_path_from_path_message (nav_msgs::Path path, std::vector<Eigen
 }
 
 
-void armDoneCb(const actionlib::SimpleClientGoalState& state,
-        const arm7dof_traj_as::trajResultConstPtr& result) {
-    ROS_INFO("armDoneCb: server responded with state [%s]", state.toString().c_str());
-    ROS_INFO("got return val = %d", result->return_val);
-}
+
 
 
 
@@ -215,14 +213,14 @@ int main (int argc, char** argv) {
 	nav_msgs::Path g_path;
 
 	optimal_path.clear();
-	arm7dof_traj_as::trajGoal arm_goal;
-	screw_loose::perceptionGoal perception_goal;
+	control_msgs::FollowJointTrajectoryGoal arm_goal;
+	screw_loose_test::perceptionGoal perception_goal;
 	Eigen::VectorXd q_pre_pose;
     Eigen::VectorXd q_vec;
     std::vector<Eigen::VectorXd> des_path;
     trajectory_msgs::JointTrajectory des_trajectory;
     Arm7dof_traj_streamer arm7dof_traj_streamer(&nh);
-	actionlib::SimpleActionClient<arm7dof_traj_as::trajAction> arm_action_client("trajActionServer", true);
+	actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_action_client("/arm7dof/joint_trajectory_controller/follow_joint_trajectory/", true);
 	
 
     q_pre_pose.resize(7);
@@ -275,7 +273,7 @@ int main (int argc, char** argv) {
     ROS_INFO("connected to arm action server"); // if here, then we connected to the server;  
     arm_goal.trajectory=des_trajectory;
     ROS_INFO("sending goals to arm: ");
-    arm_action_client.sendGoal(arm_goal, &armDoneCb); 
+    arm_action_client.sendGoal(arm_goal); 
 	}
     bool finished_before_timeout2=false;
     while (!finished_before_timeout2) {

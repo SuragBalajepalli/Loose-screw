@@ -254,149 +254,104 @@
 	  <inertia ixx="0.03" iyy="0.03" izz="1" ixy="0" ixz="0" iyz="0"/>
 	</inertial>
   </link>
-
-  <transmission name="tran0">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint0">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor0">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>7680</mechanicalReduction>
-	</actuator>
+<transmission name="tran0">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint0">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor0">
+      <mechanicalReduction>7680</mechanicalReduction>
+    </actuator>
   </transmission>
 
   <transmission name="tran1">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint1">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor1">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>7680</mechanicalReduction>
-	</actuator>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint1">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <mechanicalReduction>7680</mechanicalReduction>
+    </actuator>
   </transmission>
 
   <transmission name="tran2">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint2">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor2">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>3584</mechanicalReduction>
-	</actuator>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint2">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor2">
+      <mechanicalReduction>3584</mechanicalReduction>
+    </actuator>
   </transmission>
 
   <transmission name="tran3">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint3">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor3">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>3584</mechanicalReduction>
-	</actuator>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint3">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor3">
+      <mechanicalReduction>3584</mechanicalReduction>
+    </actuator>
   </transmission>
 
-  <transmission name="tran4">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint4">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor4">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>3125</mechanicalReduction>
-	</actuator>
+ <transmission name="tran4">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint4">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor4">
+      <mechanicalReduction>3125</mechanicalReduction>
+    </actuator>
   </transmission>
+
 
   <transmission name="tran5">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint5">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor5">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>3125</mechanicalReduction>
-	</actuator>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint5">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor5">
+      <mechanicalReduction>3125</mechanicalReduction>
+    </actuator>
   </transmission>
 
   <transmission name="tran6">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="joint6">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor6">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>3125</mechanicalReduction>
-	</actuator>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint6">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor6">
+      <mechanicalReduction>3125</mechanicalReduction>
+    </actuator>
   </transmission>
-  
-  <!--this is silly, but need to include transmission spec in order to get ft_sensor link frame published-->
-  <transmission name="tran7">
-	<type>transmission_interface/SimpleTransmission</type>
-	<joint name="ft_sensor_jnt">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	</joint>
-	<actuator name="motor7">
-	  <!--hardwareInterface>PositionJointInterface</hardwareInterface-->
-	  <!--hardwareInterface>VelocityJointInterface</hardwareInterface-->
-	  <hardwareInterface>EffortJointInterface</hardwareInterface>
-	  <mechanicalReduction>1</mechanicalReduction>
-	</actuator>
-  </transmission>  
 
+ <!--this is silly, but need to include transmission spec in order to get ft_sensor link frame published-->
+<transmission name="tran7">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wrench_jnt">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor7">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+       
     
-    <gazebo>
-     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-       <robotNamespace>/arm7dof</robotNamespace>
-     </plugin>
-  </gazebo>
-  
   
   <!--model a f/t sensor; set up a link and a joint -->
-  <link name="ft_sensor_link">
+  <link name="wrench">
       <collision>
           <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0"/>
           <geometry>
-            <cylinder length="${L_flange_disk}" radius="${r_endplate}"/> 
-          </geometry>
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/> 
+        </geometry>
       </collision>
 
       <visual>
           <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0" />
           <geometry>
-              <cylinder length="${L_flange_disk}" radius="${r_endplate}"/>
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/>  
           </geometry>
           <material name="ft_sensor_color">
               <color rgba="1 0 0 1.0"/>
@@ -411,26 +366,22 @@
   </link>
   
   <!--ideally, this would be a static joint; until fixed in gazebo, must have dynamic jnt-->
-  <joint name="ft_sensor_jnt" type="prismatic">
+  <joint name="wrench_jnt" type="prismatic">
     <parent link="link8"/>
-    <child link="ft_sensor_link"/>
-    <origin xyz="0 0 -0.003" rpy="0 0 0"/>
+    <child link="wrench"/>
+    <origin xyz="-0.85 0 -0.003" rpy="1.57 0 0"/>
     <axis xyz="0 0 1"/>
     <limit effort="100.0" lower="0" upper="0.0" velocity="0.01"/>
     <dynamics damping="1.0"/>    
   </joint>
 
+  <gazebo>
+     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+       <robotNamespace>/arm7dof</robotNamespace>
+     </plugin>
+  </gazebo>
+  
 
     <!-- Enable Joint Feedback -->
-    <gazebo reference="ft_sensor_jnt">
-        <provideFeedback>true</provideFeedback>
-    </gazebo>
-    <!-- The ft_sensor plugin -->
-    <gazebo>
-        <plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
-            <updateRate>1000.0</updateRate>
-            <topicName>ft_sensor_topic</topicName>
-            <jointName>ft_sensor_jnt</jointName>
-        </plugin>
-    </gazebo>
+    
 </robot>
