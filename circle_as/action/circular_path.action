@@ -1,0 +1,7 @@
+geometry_msgs/Pose pose
+int32 turns
+---
+nav_msgs/Path path
+---
+int32 fdbk 
+#can i omit this?

@@ -2,7 +2,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <pcl_utils/pcl_utils.h>
 #include <xform_utils/xform_utils.h>
-#include <circle_action/perceptionAction.h>
+#include <screw_loose/perceptionAction.h>
 
 
 Eigen::Affine3f g_affine_sensor_wrt_base;
@@ -14,11 +14,11 @@ class Perception {
 private:
 
 	ros::NodeHandle nh;
-	actionlib::SimpleActionServer<circle_action::perceptionAction> perception_as;
+	actionlib::SimpleActionServer<screw_loose::perceptionAction> perception_as;
 
-	circle_action::perceptionGoal goal;
-	circle_action::perceptionResult result;
-	circle_action::perceptionFeedback fdbk;
+	screw_loose::perceptionGoal goal;
+	screw_loose::perceptionResult result;
+	screw_loose::perceptionFeedback fdbk;
 
 	PclUtils pclUtils;
 	tf::TransformListener* tfListener;
@@ -33,7 +33,7 @@ public:
 	Perception();
 	~Perception(void);
 
-	void executeCb(const actionlib::SimpleActionServer<circle_action::perceptionAction>::GoalConstPtr& goal);
+	void executeCb(const actionlib::SimpleActionServer<screw_loose::perceptionAction>::GoalConstPtr& goal);
 	//Xform_utils xform_utils;//unused?
 
 };
@@ -78,7 +78,7 @@ bool Perception::find_nut(float surface_z, geometry_msgs::PoseStamped &nut_pose)
 	return found_nut;
 }
 
-void Perception::executeCb(const actionlib::SimpleActionServer<circle_action::perceptionAction>::GoalConstPtr& goal) {
+void Perception::executeCb(const actionlib::SimpleActionServer<screw_loose::perceptionAction>::GoalConstPtr& goal) {
 	geometry_msgs::PoseStamped nut_pose;
 	double surface_z;
 	bool found_nut=false;
