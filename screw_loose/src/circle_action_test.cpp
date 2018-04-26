@@ -27,7 +27,7 @@
 
 std::vector<vector<Eigen::VectorXd> > path_options;
 pcl::PointCloud<pcl::PointXYZ>::Ptr g_pclSelectedPoints_ptr;
-geometry_msgs::Pose g_recieved_pose;
+geometry_msgs::Pose g_recieved_pose, g_end_pose;
 Arm7dof_IK_solver arm7dof_ik_solver;
 //JointSpacePlanner joint_space_planner;
 bool g_pose_recieved = false; 
@@ -52,6 +52,37 @@ double convertPlanarQuaternion2Psi(geometry_msgs::Quaternion quaternion) {
 }
 
 
+void create_cutting_traj(geometry_msgs::Pose start_pose, geometry_msgs::Pose end_pose, nav_msgs::Path &cutting_path) {
+	cutting_path.poses.clear();
+	cutting_path.header.seq=0;
+	cutting_path.header.stamp=ros::Time::now();
+	cutting_path.header.frame_id= "world";
+	double dx,dy,dz;
+	geometry_msgs::PoseStamped desired_pose;
+	desired_pose.pose = start_pose;
+	desired_pose.header.seq=0;
+	desired_pose.header.frame_id="world";
+	desired_pose.header.stamp=ros::Time::now();
+	cutting_path.poses.push_back(desired_pose);
+	double cut_precision; //WHY AM I NOT USING
+	int steps = 100; //NEED TO ADJUST
+	dx=(end_pose.position.x - start_pose.position.x)/steps;
+	dy = (end_pose.position.y - start_pose.position.y)/steps;
+	dz = (end_pose.position.z - start_pose.position.z)/steps;
+	for(int i=1; i < steps+1; i++) {  //UGLY LOOPING FOR CORRECT SEQUENCE. BUT DOES SEQUENCE MATTER
+		desired_pose.header.seq = i;
+		desired_pose.header.frame_id = "world";
+		desired_pose.header.stamp= ros::Time::now();
+		desired_pose.pose.position.x +=dx;
+		desired_pose.pose.position.y +=dy;
+		desired_pose.pose.position.z +=dz;
+		cutting_path.poses.push_back(desired_pose);
+		//GOTTA FIX ORIENTATION TO POINT GRIPPER IN THE DIRECTION OF NORMAL TO LINE BETWEEN TWO POSES. HOW WILL I DO THAT
+	}
+
+}
+
+
 void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, nav_msgs::Path &circular_path) {
 	Eigen::Affine3d tf_wrench, pose_center, pose_wrench;
 	geometry_msgs::Pose wrench_pose;
@@ -59,7 +90,7 @@ void make_circular_path_around_provided_pose (geometry_msgs::Pose center_pose, n
 	circular_path.poses.clear();
 	circular_path.header.seq=0;
     circular_path.header.stamp=ros::Time::now();
-    circular_path.header.frame_id== "world";
+    circular_path.header.frame_id = "world";
     double amp = 1.0;
     
     double omega = 1.0;
@@ -211,7 +242,7 @@ int main (int argc, char** argv) {
 	ros::NodeHandle nh;
 	std::vector<Eigen::VectorXd> optimal_path;
 	nav_msgs::Path g_path;
-
+	int choice;
 	optimal_path.clear();
 	control_msgs::FollowJointTrajectoryGoal arm_goal;
 	screw_loose_test::perceptionGoal perception_goal;
@@ -234,18 +265,40 @@ int main (int argc, char** argv) {
     g_recieved_pose.orientation.y=0;
     g_recieved_pose.orientation.z=0;
     g_recieved_pose.orientation.w=1;
+
+    g_end_pose.position.x=0;
+    g_end_pose.position.y=0;
+    g_end_pose.position.z=0;
+    g_end_pose.orientation.x=0;
+    g_end_pose.orientation.y=0;
+    g_end_pose.orientation.z=0;
+    g_end_pose.orientation.w=1;
     
     while(ros::ok()) {
-    
-
     g_path.poses.clear();//gotta clear these inside functions
 	des_trajectory.points.clear();
 	optimal_path.clear();
+
+    	ROS_INFO(" For circular motion, press 1, for cutting motion, press 2");
+    	cin>>choice;
+    switch (choice) {
+    	case 1:
+    		make_circular_path_around_provided_pose(g_recieved_pose, g_path);
+    		break;
+    	case 2:
+    		create_cutting_traj(g_recieved_pose,g_end_pose, g_path);
+    		break;
+    	default:
+    		ROS_INFO("How can you mess up with just two options");
+
+    }
+
     
+    //SEG FAULT POSSIBLE HERE
 
 
 	
-	make_circular_path_around_provided_pose(g_recieved_pose, g_path);
+	
 
 	bool found_optimal_path=find_optimal_path_from_path_message(g_path, optimal_path);
 	optimal_path.push_back(q_pre_pose);
