@@ -326,12 +326,54 @@
   </transmission>
 
  <!--this is silly, but need to include transmission spec in order to get ft_sensor link frame published-->
-
+<transmission name="tran7">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wrench_jnt">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor7">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
 
        
     
   
   <!--model a f/t sensor; set up a link and a joint -->
+  <link name="wrench">
+      <collision>
+          <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/> 
+        </geometry>
+      </collision>
+
+      <visual>
+          <origin xyz="0 0 ${-L_flange_disk/2}" rpy="0 0 0" />
+          <geometry>
+            <mesh filename="file:///home/user/ros_ws/src/Loose-screw/socket_wrench.stl"  scale="0.05 0.05 0.05"/>  
+          </geometry>
+          <material name="ft_sensor_color">
+              <color rgba="1 0 0 1.0"/>
+          </material>
+      </visual>
+
+      <inertial>
+          <mass value="0.01" />
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+  </link>
+  
+  <!--ideally, this would be a static joint; until fixed in gazebo, must have dynamic jnt-->
+  <joint name="wrench_jnt" type="prismatic">
+    <parent link="link8"/>
+    <child link="wrench"/>
+    <origin xyz="-0.85 0 -0.003" rpy="1.57 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100.0" lower="0" upper="0.0" velocity="0.01"/>
+    <dynamics damping="1.0"/>    
+  </joint>
 
   <gazebo>
      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">

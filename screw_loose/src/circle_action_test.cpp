@@ -70,7 +70,7 @@ void create_cutting_traj(geometry_msgs::Pose start_pose, geometry_msgs::Pose end
 	dy = (end_pose.position.y - start_pose.position.y)/steps;
 	dz = (end_pose.position.z - start_pose.position.z)/steps;
 	for(int i=1; i < steps+1; i++) {  //UGLY LOOPING FOR CORRECT SEQUENCE. BUT DOES SEQUENCE MATTER
-		desired_pose.header.seq = i;
+		//desired_pose.header.seq = i;
 		desired_pose.header.frame_id = "world";
 		desired_pose.header.stamp= ros::Time::now();
 		desired_pose.pose.position.x +=dx;
@@ -79,6 +79,8 @@ void create_cutting_traj(geometry_msgs::Pose start_pose, geometry_msgs::Pose end
 		cutting_path.poses.push_back(desired_pose);
 		//GOTTA FIX ORIENTATION TO POINT GRIPPER IN THE DIRECTION OF NORMAL TO LINE BETWEEN TWO POSES. HOW WILL I DO THAT
 	}
+    desired_pose.pose=end_pose;
+    cutting_path.poses.push_back(desired_pose);
 
 }
 
@@ -258,17 +260,17 @@ int main (int argc, char** argv) {
     q_pre_pose << 0, 1, 0, -2, 0, 1, 0; 
     path_options.clear();
     
-    g_recieved_pose.position.x=0;
-    g_recieved_pose.position.y=0;
-    g_recieved_pose.position.z=0;
+    g_recieved_pose.position.x=-2;
+    g_recieved_pose.position.y=0.5;
+    g_recieved_pose.position.z=1.5;
     g_recieved_pose.orientation.x=0;
     g_recieved_pose.orientation.y=0;
     g_recieved_pose.orientation.z=0;
     g_recieved_pose.orientation.w=1;
 
-    g_end_pose.position.x=0;
-    g_end_pose.position.y=0;
-    g_end_pose.position.z=0;
+    g_end_pose.position.x=2;
+    g_end_pose.position.y=0.5;
+    g_end_pose.position.z=1.5;
     g_end_pose.orientation.x=0;
     g_end_pose.orientation.y=0;
     g_end_pose.orientation.z=0;
@@ -301,7 +303,7 @@ int main (int argc, char** argv) {
 	
 
 	bool found_optimal_path=find_optimal_path_from_path_message(g_path, optimal_path);
-	optimal_path.push_back(q_pre_pose);
+	//optimal_path.push_back(q_pre_pose);
 	if(found_optimal_path) {
 	q_vec = arm7dof_traj_streamer.get_q_vec_Xd(); 
     cout << "arm current state:" << q_vec.transpose() << endl;
